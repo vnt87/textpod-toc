@@ -4,7 +4,7 @@
 
 # Textpod
 
-This is a fork of [freetonik/textpod](https://github.com/freetonik/textpod) but with a touch of [DaisyUI](https://daisyui.com) support. Textpod is a local-first web-based note-taking application built with Rust and modern web technologies.
+This is a fork of [freetonik/textpod](https://github.com/freetonik/textpod) but with a bunch of [DaisyUI](https://daisyui.com) themes. Textpod is a local-first web-based note-taking application built with Rust and modern web technologies.
 
 ![textpod screenshot](screenshot-textpodaisy.png)
 
