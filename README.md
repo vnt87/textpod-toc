@@ -31,8 +31,8 @@ This is a fork of [freetonik/textpod](https://github.com/freetonik/textpod) but 
 1. Make sure you have Rust installed. If not, install it from [rustup.rs](https://rustup.rs/)
 2. Clone this repository:
    ```bash
-   git clone https://github.com/vnt87/textpod.git
-   cd textpod
+   git clone https://github.com/vnt87/textpod-daisyui.git
+   cd textpod-daisyui
    ```
 3. Build and run:
    ```bash
