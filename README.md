@@ -4,7 +4,7 @@
 
 # Textpod
 
-A local-first web-based note-taking application built with Rust and modern web technologies.
+This is a fork of [freetonik/textpod](https://github.com/freetonik/textpod) but with a touch of [DaisyUI](https://daisyui.com) support. Textpod is a local-first web-based note-taking application built with Rust and modern web technologies.
 
 ![textpod screenshot](screenshot-textpodaisy.png)
 
@@ -13,7 +13,7 @@ A local-first web-based note-taking application built with Rust and modern web t
 - Markdown support with real-time preview
 - Full-text search
 - File attachments with automatic local copies
-- Dark mode and multiple themes powered by DaisyUI
+- Dark mode and multiple themes powered by [DaisyUI](https://daisyui.com)
 - 30+ beautiful built-in themes including:
   - Light & Dark
   - Cupcake
@@ -41,10 +41,10 @@ A local-first web-based note-taking application built with Rust and modern web t
    ```
 4. Open your browser and navigate to `http://localhost:3000`
 
-## Usage
+## But...why though? Isn't Textpod meant to be dead simple?
 
-Run `textpod` in any directory. It will create a `notes.md` file if it doesn't exist. It will create `attachments` directory for file and image attachments.
-Webpages are saved in `attachments/webpages`. You can specify the port with `-p` flag, e.g. `textpod -p 8080` and/or the address with `-l` flag, e.g. `textpod -l 0.0.0.0`.
+Yes, but I'm a Product Designer by trade and I wanted to spice up the UI a bit. Also, you may have guessed but I'm also not a coder so I may have received some help from Claude with this integration.
+
 
 ## Contributing
 
