@@ -1,10 +1,12 @@
+version: '3.8'
+
 services:
-    textpod-docker:
-        image: freetonik/textpod:latest
-        build: .
-        ports:
-            - '8099:3000'
-        volumes:
-            - './notes:/app/notes'
-        container_name: textpod
-        restart: unless-stopped
+  textpod:
+    image: namvu87/textpod-daisyui:latest
+    build: .
+    ports:
+      - '3000:3000'
+    volumes:
+      - './data:/app'
+    container_name: textpod-daisyui
+    restart: unless-stopped

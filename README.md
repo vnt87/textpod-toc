@@ -28,6 +28,24 @@ This is a fork of [freetonik/textpod](https://github.com/freetonik/textpod) but 
 
 ## Installation
 
+### Option 1: Using Docker
+
+The easiest way to run Textpod is using Docker:
+
+```bash
+docker run -d -p 3000:3000 -v $(pwd)/data:/app namvu87/textpod-daisyui:latest
+```
+
+Or using docker-compose:
+
+```bash
+git clone https://github.com/vnt87/textpod-daisyui.git
+cd textpod-daisyui
+docker-compose up -d
+```
+
+### Option 2: Building from source
+
 1. Make sure you have Rust installed. If not, install it from [rustup.rs](https://rustup.rs/)
 2. Clone this repository:
    ```bash

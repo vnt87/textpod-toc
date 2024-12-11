@@ -1,17 +1,24 @@
-FROM rust:alpine AS build
+FROM rust:slim-bullseye as builder
 
-RUN apk add musl-dev perl make
-RUN cargo install textpod
-RUN cargo install monolith
+WORKDIR /usr/src/textpod
+COPY . .
 
-FROM alpine
-COPY --from=build /usr/local/cargo/bin/textpod /usr/bin/textpod
-COPY --from=build /usr/local/cargo/bin/monolith /usr/bin/monolith
+RUN cargo build --release
 
-WORKDIR /app/notes
+FROM debian:bullseye-slim
+
+RUN apt-get update && apt-get install -y netcat \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /usr/src/textpod/target/release/textpod /usr/local/bin/textpod
+
+WORKDIR /app
+VOLUME /app
 
 HEALTHCHECK --interval=60s --retries=3 --timeout=1s \
-CMD nc -z -w 1 localhost 3000 || exit 1
+    CMD nc -z -w 1 localhost 3000 || exit 1
+
+EXPOSE 3000
 
 ENTRYPOINT ["textpod"]
 CMD ["-p", "3000", "-l", "0.0.0.0"]
