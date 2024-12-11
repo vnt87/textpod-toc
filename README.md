@@ -6,6 +6,8 @@
 
 A local-first web-based note-taking application built with Rust and modern web technologies.
 
+![textpod screenshot](screenshot-textpodaisy.png)
+
 ## Features
 
 - Markdown support with real-time preview
