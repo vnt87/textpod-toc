@@ -1,27 +1,13 @@
-[![textpod build status on GNU/Linux](https://github.com/freetonik/textpod/workflows/GNU%2FLinux/badge.svg)](https://github.com/freetonik/textpod/actions?query=workflow%3AGNU%2FLinux)
-[![textpod build status on macOS](https://github.com/freetonik/textpod/workflows/macOS/badge.svg)](https://github.com/freetonik/textpod/actions?query=workflow%3AmacOS)
-[![textpod build status on Windows](https://github.com/freetonik/textpod/workflows/Windows/badge.svg)](https://github.com/freetonik/textpod/actions?query=workflow%3AWindows)
-
 # Textpod
 
-This is a fork of [freetonik/textpod](https://github.com/freetonik/textpod) but with a bunch of [DaisyUI](https://daisyui.com) themes. Textpod is a local-first web-based note-taking application built with Rust and modern web technologies.
+This is a fork of [freetonik/textpod](https://github.com/freetonik/textpod) but with a few minor changes
 
-![textpod screenshot](screenshot-textpodaisy.png)
-
+  
 ## Features
 
-- Markdown support with real-time preview
-- Full-text search
-- File attachments with automatic local copies
-- Dark mode and multiple themes powered by [DaisyUI](https://daisyui.com)
-- 30+ beautiful built-in themes including:
-  - Light & Dark
-  - Cupcake
-  - Cyberpunk
-  - Synthwave
-  - Retro
-  - Forest
-  - And many more!
+- Updated UI styling with [Flowbite](https://flowbite.com) and [Lucide Icon](https://lucide.dev/icons/)
+- Extra feature: Table of Content (inspired by this [reddit comment](https://www.reddit.com/r/selfhosted/comments/1gl3sqh/comment/lvs3ius/)
+- Set [Bai Jamjuree](https://fonts.google.com/specimen/Bai+Jamjuree) as the default font
 - Local-first: all data stored on your machine
 - Fast and lightweight
 - Responsive design
@@ -39,8 +25,8 @@ docker run -d -p 3000:3000 -v $(pwd)/data:/app namvu87/textpod-daisyui:latest
 Or using docker-compose:
 
 ```bash
-git clone https://github.com/vnt87/textpod-daisyui.git
-cd textpod-daisyui
+git clone https://github.com/vnt87/textpod-toc.git
+cd textpod-toc
 docker-compose up -d
 ```
 
@@ -61,7 +47,11 @@ docker-compose up -d
 
 ## But...why though? Isn't Textpod meant to be dead simple?
 
-Yes, but I'm a Product Designer by trade and I wanted to spice up the UI a bit. Also, you may have guessed but I'm also not a coder so I may have received some help from Claude with this integration.
+Yes, but I'm a Product Designer by trade and I wanted to spice up the UI a bit.
+
+## Why should I use this version instead of the original?
+
+You uh, probably shouldn't. I'm not a developer so these features were written with extensive help of AI, so there's probably a bunch of unnecessary codes in there. I mean, some of them wasn't even the AI's fault. I embedded an entire icon library just so I could use 2 icons. 
 
 
 ## Contributing
