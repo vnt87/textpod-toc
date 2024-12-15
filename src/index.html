@@ -1,172 +1,194 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <title>Textpod</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light dark" />
     <link rel="shortcut icon" href="{{FAVICON}}" />
-    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.19/dist/full.min.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            daisyui: {
-                themes: ["light", "dark", "cupcake", "bumblebee", "emerald", "corporate", "synthwave", "retro", "cyberpunk", "valentine", "halloween", "garden", "forest", "aqua", "lofi", "pastel", "fantasy", "wireframe", "black", "luxury", "dracula", "cmyk", "autumn", "business", "acid", "lemonade", "night", "coffee", "winter"]
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Bai Jamjuree', sans-serif;
+        }
+
+        #editor {
+            resize: vertical;
+            min-height: 200px;
+            font-family: 'Bai Jamjuree', sans-serif;
+            font-weight: 300;
+        }
+
+        .note.highlight {
+            animation: highlight-fade 0.75s ease-out;
+        }
+
+        @keyframes highlight-fade {
+            0% {
+                background-color: rgba(59, 130, 246, 0.2);
+                opacity: 1;
+            }
+            100% {
+                background-color: transparent;
+                opacity: 0;
             }
         }
-    </script>
-    <style>
-        html { height: 100%; }
-        body { min-height: 100vh; }
-        #editor {
-            width: 100%;
-            height: 200px;
-            resize: vertical;
-            box-sizing: border-box;
-            font-family: monospace;
+
+        .toc {
+            position: sticky;
+            top: 1.5rem;
+            max-height: calc(100vh - 5rem);
+            overflow-y: auto;
+            height: fit-content;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
         }
-        .app-title {
-            font-family: 'EB Garamond', serif;
+
+        .toc.hidden {
+            opacity: 0;
+            transform: translateX(20px);
+            pointer-events: none;
         }
-        .note {
-            @apply card bg-base-100 shadow-xl mb-6;
+
+        .logo {
+            font-family: 'Bai Jamjuree', sans-serif;
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: -1px;
         }
+
         .note-content {
-            @apply card-body;
+            font-family: 'Bai Jamjuree', sans-serif;
+            font-weight: 300;
+            font-size: 1rem;
+            line-height: 1.6;
         }
-        .note .noteMetadata {
-            @apply text-sm opacity-70 mt-4 font-mono flex items-center justify-between;
+
+        @media (max-width: 1024px) {
+            .toc {
+                position: fixed;
+                right: 1rem;
+                top: 5rem;
+                width: 250px;
+                z-index: 50;
+                max-height: calc(100vh - 7rem);
+            }
         }
-        .note .noteMetadata button {
-            @apply btn btn-ghost btn-sm text-error hover:bg-error hover:text-error-content;
-        }
-        .note pre {
-            @apply bg-base-200 p-4 rounded-lg my-4;
-        }
-        .note code {
-            @apply bg-base-200 px-2 py-1 rounded;
-        }
-        .note img, .note iframe, .note video, .note audio, .note embed, .note svg {
-            max-width: 100%;
-            @apply rounded-lg;
-        }
-        .note p, .note li {
-            @apply text-lg;
-        }
-        .note h1 { @apply text-2xl font-bold mb-4; }
-        .note h2 { @apply text-xl font-bold mb-3; }
-        .note h3 { @apply text-lg font-bold mb-2; }
     </style>
 </head>
 
-<body data-theme="light">
-    <div class="container mx-auto px-4 py-8 max-w-4xl">
-        <div class="navbar bg-base-100 rounded-box mb-6">
-            <div class="flex-1">
-                <h1 class="text-3xl font-bold app-title">Textpod</h1>
-            </div>
-            <div class="flex-none">
-                <select class="select select-bordered w-full max-w-xs" id="theme-select">
-                    <option value="light">Light</option>
-                    <option value="dark">Dark</option>
-                    <option value="cupcake">Cupcake</option>
-                    <option value="bumblebee">Bumblebee</option>
-                    <option value="emerald">Emerald</option>
-                    <option value="corporate">Corporate</option>
-                    <option value="synthwave">Synthwave</option>
-                    <option value="retro">Retro</option>
-                    <option value="cyberpunk">Cyberpunk</option>
-                    <option value="valentine">Valentine</option>
-                    <option value="halloween">Halloween</option>
-                    <option value="garden">Garden</option>
-                    <option value="forest">Forest</option>
-                    <option value="aqua">Aqua</option>
-                    <option value="lofi">Lo-Fi</option>
-                    <option value="pastel">Pastel</option>
-                    <option value="fantasy">Fantasy</option>
-                    <option value="wireframe">Wireframe</option>
-                    <option value="black">Black</option>
-                    <option value="luxury">Luxury</option>
-                    <option value="dracula">Dracula</option>
-                    <option value="cmyk">CMYK</option>
-                    <option value="autumn">Autumn</option>
-                    <option value="business">Business</option>
-                    <option value="acid">Acid</option>
-                    <option value="lemonade">Lemonade</option>
-                    <option value="night">Night</option>
-                    <option value="coffee">Coffee</option>
-                    <option value="winter">Winter</option>
-                </select>
-            </div>
+<body class="bg-white dark:bg-gray-900">
+    <div class="container mx-auto p-4">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="logo text-gray-900 dark:text-white">TextPod</h1>
+            <button id="tocToggle" class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">
+                <i class="fas fa-list-ul mr-2"></i>Table of Contents
+            </button>
         </div>
+        <div class="grid grid-cols-1 lg:grid-cols-[1fr,250px] gap-8">
+            <div class="main-content">
+                <textarea id="editor" class="block p-2.5 w-full text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+                    placeholder="Ctrl+Enter to save.&#10;Type / to search.&#10;Drag & drop files to attach.&#10;Start links with + to save local copies."></textarea>
+                
+                <div class="flex justify-end mt-4 mb-8">
+                    <button id="submitButton" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Submit</button>
+                </div>
 
-        <div class="mb-8">
-            <textarea id="editor" class="textarea textarea-bordered w-full text-lg"
-                placeholder="Ctrl+Enter to save.&#10;Type / to search.&#10;Drag & drop files to attach.&#10;Start links with + to save local copies."></textarea>
-            <div id="submitContainer" class="mt-4 text-right">
-                <button id="submitButton" class="btn btn-primary">Submit</button>
+                <div id="notes">
+                    <!-- Notes will be dynamically inserted here -->
+                </div>
+            </div>
+
+            <div id="toc" class="toc bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+                <h4 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Table of Contents</h4>
+                <div id="tocContent"></div>
             </div>
         </div>
-        
-        <div id="notes" class="space-y-6"></div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
     <script>
         const editor = document.getElementById('editor');
         const notesDiv = document.getElementById('notes');
         const submitButton = document.getElementById('submitButton');
-        const themeSelect = document.getElementById('theme-select');
+        const tocToggle = document.getElementById('tocToggle');
+        const toc = document.getElementById('toc');
         let searchTimeout = null;
 
-        // Theme handling
-        function setTheme(theme) {
-            document.body.setAttribute('data-theme', theme);
-            localStorage.setItem('theme', theme);
-        }
+        // Load TOC visibility state
+        const tocVisible = localStorage.getItem('tocVisible') !== 'false';
+        toc.classList.toggle('hidden', !tocVisible);
 
-        // Initialize theme
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        setTheme(savedTheme);
-        themeSelect.value = savedTheme;
-
-        themeSelect.addEventListener('change', (e) => {
-            setTheme(e.target.value);
+        // Handle TOC toggle
+        tocToggle.addEventListener('click', () => {
+            const isVisible = !toc.classList.contains('hidden');
+            toc.classList.toggle('hidden');
+            localStorage.setItem('tocVisible', !isVisible);
         });
 
         window.addEventListener('load', async () => {
             displayNotes();
         });
 
-        // fetches and displays all notes, optionally filtering them based on the query parameter `q`
+        function smoothScroll(target) {
+            document.querySelectorAll('.note.highlight').forEach(el => {
+                el.classList.remove('highlight');
+            });
+            target.classList.add('highlight');
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+
         async function displayNotes() {
             const params = new URLSearchParams(window.location.search);
             const searchQuery = params.get('q');
             let response = await fetch('/notes');
             if (response.ok) {
                 const notes = await response.json();
-                notesDiv.innerHTML = notes
-                    .filter(note => !searchQuery || note.content.toLowerCase().includes(searchQuery.toLowerCase()))
-                    .map((note, i) => `
-                    <div class="note">
-                        <div class="note-content">
-                            ${note.html}
-                            <div class="noteMetadata">
-                                <time datetime="${note.timestamp}">${note.timestamp}</time>
-                                <button onclick="deleteNote(${i})" class="tooltip" data-tip="Delete note">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                                    </svg>
+                const filteredNotes = notes.filter(note => 
+                    !searchQuery || note.content.toLowerCase().includes(searchQuery.toLowerCase())
+                );
+
+                notesDiv.innerHTML = filteredNotes
+                    .map((note, i) => {
+                        const noteId = `note-${i}`;
+                        return `
+                        <div id="${noteId}" class="note bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-4">
+                            <div class="note-content prose dark:prose-invert max-w-none">
+                                ${note.html}
+                            </div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400 mt-2 flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <i class="far fa-clock"></i>
+                                    <time datetime="${note.timestamp}">${note.timestamp}</time>
+                                </div>
+                                <button onclick="deleteNote(${i})" class="text-red-600 hover:text-red-800 dark:text-red-500 dark:hover:text-red-400" title="Delete note">
+                                    <span class="fas fa-trash-alt"></span>
                                 </button>
                             </div>
-                        </div>
-                    </div>`)
+                        </div>`
+                    })
+                    .reverse()
+                    .join('');
+
+                const tocContent = document.getElementById('tocContent');
+                tocContent.innerHTML = filteredNotes
+                    .map((note, i) => {
+                        const title = note.content.split('\n')[0].slice(0, 20) + 
+                            (note.content.split('\n')[0].length > 20 ? '...' : '');
+                        return `<a href="#note-${i}" class="block py-2 px-3 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" onclick="event.preventDefault(); smoothScroll(document.getElementById('note-${i}'))">${title}</a>`;
+                    })
                     .reverse()
                     .join('');
             }
         }
 
-        // saves a new note and refreshes the page
         async function saveNotes() {
             if (!editor.value) {
                 return;
@@ -177,14 +199,12 @@
                 body: JSON.stringify(editor.value)
             });
 
-            // TODO more efficient way to do this than reloading all notes every time
             if (saveResponse.ok) {
                 editor.value = '';
                 displayNotes();
             }
         }
 
-        // deletes note with index `idx`
         async function deleteNote(idx) {
             event.preventDefault();
             if (!confirm('Are you sure you want to delete this note?')) {
@@ -210,16 +230,13 @@
                 }
                 searchTimeout = setTimeout(async () => {
                     const query = text.slice(1);
-                    // Update URL with search parameter
                     const newUrl = query
                         ? `${window.location.pathname}?q=${encodeURIComponent(query)}`
                         : window.location.pathname;
                     window.history.replaceState({}, '', newUrl);
-
                     displayNotes();
                 }, 200);
             } else if (text === '') {
-                // Clear search parameter from URL
                 window.history.replaceState({}, '', window.location.pathname);
             }
         });
@@ -232,7 +249,7 @@
 
         submitButton.addEventListener('click', async (e) => {
             saveNotes();
-        })
+        });
 
         editor.addEventListener('dragover', (e) => {
             e.preventDefault();
@@ -259,7 +276,6 @@
                     const before = editor.value.substring(0, position);
                     const after = editor.value.substring(position);
 
-                    // Link path with spaces needs to be wrapped in < >, Commonmark spec apparently handles this
                     const needsBrackets = path.includes(' ') || filename.includes(' ');
                     const formattedPath = needsBrackets ? `<${path}>` : path;
 
