@@ -25,6 +25,8 @@ use tracing_subscriber;
 
 const INDEX_HTML: &str = include_str!("index.html");
 const FAVICON_SVG: &[u8] = include_bytes!("favicon.svg");
+const CSS_FILE: &str = include_str!("css/main.css");
+const JS_FILE: &str = include_str!("js/main.js");
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -78,6 +80,8 @@ async fn main() {
             get(get_note_by_index).delete(delete_note_by_index),
         ) // TODO PUT/PATCH
         .route("/upload", post(upload_file))
+        .route("/css/main.css", get(serve_css))
+        .route("/js/main.js", get(serve_js))
         .layer(DefaultBodyLimit::max(CONTENT_LENGTH_LIMIT))
         .nest_service("/attachments", ServeDir::new("attachments"))
         .with_state(state);
@@ -306,6 +310,15 @@ async fn upload_file(mut multipart: Multipart) -> Result<Json<String>, StatusCod
 
     error!("Error uploading file");
     Err(StatusCode::BAD_REQUEST)
+}
+
+// Add new handler functions
+async fn serve_css() -> impl IntoResponse {
+    ([("Content-Type", "text/css")], CSS_FILE)
+}
+
+async fn serve_js() -> impl IntoResponse {
+    ([("Content-Type", "application/javascript")], JS_FILE)
 }
 
 // UTILS

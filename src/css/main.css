@@ -1,0 +1,68 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Bai Jamjuree', sans-serif;
+}
+
+#editor {
+    resize: vertical;
+    min-height: 200px;
+    font-family: 'Bai Jamjuree', sans-serif;
+    font-weight: 300;
+}
+
+.note.highlight {
+    animation: highlight-fade 0.75s ease-out;
+}
+
+@keyframes highlight-fade {
+    0% {
+        background-color: rgba(59, 130, 246, 0.2);
+        opacity: 1;
+    }
+    100% {
+        background-color: transparent;
+        opacity: 0;
+    }
+}
+
+.toc {
+    position: sticky;
+    top: 1.5rem;
+    max-height: calc(100vh - 5rem);
+    overflow-y: auto;
+    height: fit-content;
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.toc.hidden {
+    opacity: 0;
+    transform: translateX(20px);
+    pointer-events: none;
+}
+
+.logo {
+    font-family: 'Bai Jamjuree', sans-serif;
+    font-size: 2rem;
+    font-weight: 600;
+    letter-spacing: -1px;
+}
+
+.note-content {
+    font-family: 'Bai Jamjuree', sans-serif;
+    font-weight: 300;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+@media (max-width: 1024px) {
+    .toc {
+        position: fixed;
+        right: 1rem;
+        top: 5rem;
+        width: 250px;
+        z-index: 50;
+        max-height: calc(100vh - 7rem);
+    }
+}
