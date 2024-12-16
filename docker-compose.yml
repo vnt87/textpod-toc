@@ -1,8 +1,6 @@
-version: '3.8'
-
 services:
   textpod:
-    image: namvu87/textpod-daisyui:latest
+    image: namvu87/textpod-toc:latest
     build: .
     ports:
       - '3000:3000'
