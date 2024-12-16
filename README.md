@@ -12,6 +12,9 @@ This is a fork of [freetonik/textpod](https://github.com/freetonik/textpod) but 
 - Fast and lightweight
 - Responsive design
 
+![screenshot](screenshot.png)
+
+
 ## Installation
 
 ### Option 1: Using Docker
