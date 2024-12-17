@@ -5,7 +5,7 @@ This is a fork of [freetonik/textpod](https://github.com/freetonik/textpod) but 
   
 ## Features
 
-- Updated UI styling with [Flowbite](https://flowbite.com) and [Lucide Icon](https://lucide.dev/icons/)
+- Updated UI styling with [Flowbite](https://flowbite.com) and [Font Awesome](https://fontawesome.com)
 - Extra feature: Table of Content (inspired by this [reddit comment](https://www.reddit.com/r/selfhosted/comments/1gl3sqh/comment/lvs3ius/)
 - Set [Bai Jamjuree](https://fonts.google.com/specimen/Bai+Jamjuree) as the default font
 - Local-first: all data stored on your machine
