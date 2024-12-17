@@ -14,7 +14,6 @@ This is a fork of [freetonik/textpod](https://github.com/freetonik/textpod) but 
 
 ![screenshot](screenshot.png)
 
-
 ## Installation
 
 ### Option 1: Using Docker
@@ -47,6 +46,9 @@ docker-compose up -d
    cargo run
    ```
 4. Open your browser and navigate to `http://localhost:3000`
+
+### Option 3: Deploy on Vercel
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvnt87%2Ftextpod-toc)
 
 ## But...why though? Isn't Textpod meant to be dead simple?
 
