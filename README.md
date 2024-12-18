@@ -21,7 +21,7 @@ This is a fork of [freetonik/textpod](https://github.com/freetonik/textpod) but 
 The easiest way to run Textpod is using Docker:
 
 ```bash
-docker run -d -p 3000:3000 -v $(pwd)/data:/app namvu87/textpod-toc:latest
+docker run -d -p 3000:3000 -v $(pwd)/data:/app ghcr.io/vnt87/textpod-toc:latest
 ```
 
 Or using docker-compose:
