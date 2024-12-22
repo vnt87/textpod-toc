@@ -51,11 +51,11 @@ async function displayNotes() {
                     </div>
                     <div class="text-sm text-gray-500 dark:text-gray-400 mt-2 flex justify-between items-center">
                         <div class="flex items-center gap-2">
-                            <i class="far fa-clock"></i>
+                            <i data-lucide="clock" class="w-4 h-4"></i>
                             <time datetime="${note.timestamp}">${note.timestamp}</time>
                         </div>
                         <button onclick="deleteNote(${i})" class="text-red-600 hover:text-red-800 dark:text-red-500 dark:hover:text-red-400" title="Delete note">
-                            <span class="fas fa-trash-alt"></span>
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                     </div>
                 </div>`;
@@ -73,6 +73,7 @@ async function displayNotes() {
             .reverse()
             .join('');
     }
+    lucide.createIcons();
 }
 
 async function saveNotes() {
