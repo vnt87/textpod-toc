@@ -18,6 +18,14 @@ tocToggle.addEventListener('click', () => {
 
 window.addEventListener('load', async () => {
     displayNotes();
+    // Add global link handler
+    document.addEventListener('click', (e) => {
+        const link = e.target.closest('a');
+        if (link && !link.hasAttribute('target') && link.href.startsWith('http')) {
+            link.setAttribute('target', '_blank');
+            link.setAttribute('rel', 'noopener noreferrer');
+        }
+    });
 });
 
 function smoothScroll(target) {
@@ -40,6 +48,19 @@ async function displayNotes() {
         const filteredNotes = notes.filter(note => 
             !searchQuery || note.content.toLowerCase().includes(searchQuery.toLowerCase())
         );
+
+        // Process the HTML content to add target="_blank" to links
+        filteredNotes.forEach(note => {
+            const div = document.createElement('div');
+            div.innerHTML = note.html;
+            div.querySelectorAll('a').forEach(link => {
+                if (link.href.startsWith('http')) {
+                    link.setAttribute('target', '_blank');
+                    link.setAttribute('rel', 'noopener noreferrer');
+                }
+            });
+            note.html = div.innerHTML;
+        });
 
         notesDiv.innerHTML = filteredNotes
             .map((note, i) => {
