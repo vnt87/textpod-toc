@@ -29,7 +29,7 @@ Or using docker-compose:
 ```bash
 git clone https://github.com/vnt87/textpod-toc.git
 cd textpod-toc
-docker-compose up -d
+docker compose up -d
 ```
 
 ### Option 2: Building from source
