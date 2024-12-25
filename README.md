@@ -27,9 +27,8 @@ docker run -d -p 3000:3000 -v $(pwd)/data:/app ghcr.io/vnt87/textpod-toc:latest
 Or using docker-compose:
 
 ```bash
-git clone https://github.com/vnt87/textpod-toc.git
-cd textpod-toc
-docker-compose up -d
+wget https://raw.githubusercontent.com/vnt87/textpod-toc/refs/heads/main/docker-compose.yml
+docker compose up -d
 ```
 
 ### Option 2: Building from source

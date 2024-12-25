@@ -1,10 +1,10 @@
 services:
   textpod:
-    image: namvu87/textpod-toc:latest
+    image: ghcr.io/vnt87/textpod-toc:latest
     build: .
     ports:
       - '3000:3000'
     volumes:
       - './data:/app'
-    container_name: textpod-daisyui
+    container_name: textpod-toc
     restart: unless-stopped
