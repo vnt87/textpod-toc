@@ -1,16 +1,22 @@
-FROM rust:slim-bullseye as builder
+FROM rust:alpine AS builder
+
+# Install build dependencies
+RUN apk add --no-cache musl-dev
 
 WORKDIR /usr/src/textpod
 COPY . .
 
-RUN cargo build --release
+# Build for musl target
+RUN rustup target add x86_64-unknown-linux-musl && \
+    cargo build --release --target x86_64-unknown-linux-musl && \
+    strip /usr/src/textpod/target/x86_64-unknown-linux-musl/release/textpod
 
-FROM debian:bullseye-slim
+FROM alpine:3.19
 
-RUN apt-get update && apt-get install -y netcat \
-    && rm -rf /var/lib/apt/lists/*
+# Install only netcat-openbsd for healthcheck
+RUN apk add --no-cache netcat-openbsd
 
-COPY --from=builder /usr/src/textpod/target/release/textpod /usr/local/bin/textpod
+COPY --from=builder /usr/src/textpod/target/x86_64-unknown-linux-musl/release/textpod /usr/local/bin/textpod
 
 WORKDIR /app
 VOLUME /app
