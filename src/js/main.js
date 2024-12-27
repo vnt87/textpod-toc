@@ -1,3 +1,21 @@
+// Theme toggle functionality
+if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark');
+} else {
+    document.documentElement.classList.remove('dark');
+}
+
+const themeToggle = document.getElementById('themeToggle');
+themeToggle.addEventListener('click', () => {
+    if (document.documentElement.classList.contains('dark')) {
+        document.documentElement.classList.remove('dark');
+        localStorage.theme = 'light';
+    } else {
+        document.documentElement.classList.add('dark');
+        localStorage.theme = 'dark';
+    }
+});
+
 const editor = document.getElementById('editor');
 const notesDiv = document.getElementById('notes');
 const submitButton = document.getElementById('submitButton');
@@ -67,7 +85,7 @@ async function displayNotes() {
                 const noteId = `note-${i}`;
                 return `
                 <div id="${noteId}" class="note bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-4">
-                    <div class="note-content prose dark:prose-invert max-w-none">
+                    <div class="note-content prose dark:prose-invert max-w-none text-gray-900 dark:text-white">
                         ${note.html}
                     </div>
                     <div class="text-sm text-gray-500 dark:text-gray-400 mt-2 flex justify-between items-center">
