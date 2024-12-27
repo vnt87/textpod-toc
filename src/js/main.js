@@ -75,9 +75,14 @@ async function displayNotes() {
                             <i data-lucide="clock" class="w-4 h-4"></i>
                             <time datetime="${note.timestamp}">${note.timestamp}</time>
                         </div>
-                        <button onclick="deleteNote(${i})" class="text-red-600 hover:text-red-800 dark:text-red-500 dark:hover:text-red-400" title="Delete note">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
-                        </button>
+                        <div class="flex items-center gap-2">
+                            <button onclick="copyNote(${i}, this)" class="text-gray-600 hover:text-gray-800 dark:text-gray-500 dark:hover:text-gray-400" title="Copy note">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="deleteNote(${i})" class="text-red-600 hover:text-red-800 dark:text-red-500 dark:hover:text-red-400" title="Delete note">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>`;
             })
@@ -127,6 +132,33 @@ async function deleteNote(idx) {
         displayNotes();
     } else {
         alert('Failed to delete note');
+    }
+}
+
+async function copyNote(idx, button) {
+    const note = document.querySelector(`#note-${idx} .note-content`);
+    const text = note.innerText;
+    
+    try {
+        await navigator.clipboard.writeText(text);
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<span class="text-gray-400">Copied</span>';
+        
+        // Show toast message
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg transition-opacity duration-300';
+        toast.textContent = 'Note copied successfully';
+        document.body.appendChild(toast);
+        
+        // Reset button and remove toast after 2 seconds
+        setTimeout(() => {
+            button.innerHTML = originalHTML;
+            lucide.createIcons();
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 300);
+        }, 2000);
+    } catch (err) {
+        console.error('Failed to copy note:', err);
     }
 }
 

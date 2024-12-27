@@ -79,3 +79,11 @@ html, body {
         max-height: calc(100vh - 7rem);
     }
 }
+
+.fixed {
+    z-index: 9999;
+}
+
+.transition-opacity {
+    transition: opacity 0.3s ease-in-out;
+}
