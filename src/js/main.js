@@ -60,7 +60,14 @@ function smoothScroll(target) {
 async function displayNotes() {
     const params = new URLSearchParams(window.location.search);
     const searchQuery = params.get('q');
-    let response = await fetch('/notes');
+    let response;
+    
+    if (searchQuery) {
+        response = await fetch(`/notes/search?q=${encodeURIComponent(searchQuery)}`);
+    } else {
+        response = await fetch('/notes');
+    }
+
     if (response.ok) {
         const notes = await response.json();
         const filteredNotes = notes.filter(note => 
@@ -154,21 +161,22 @@ async function deleteNote(idx) {
 }
 
 async function copyNote(idx, button) {
-    const note = document.querySelector(`#note-${idx} .note-content`);
-    const text = note.innerText;
-    
     try {
+        const response = await fetch(`/notes/${idx}/content`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch note content');
+        }
+        const text = await response.text();
         await navigator.clipboard.writeText(text);
+        
         const originalHTML = button.innerHTML;
         button.innerHTML = '<span class="text-gray-400">Copied</span>';
         
-        // Show toast message
         const toast = document.createElement('div');
         toast.className = 'fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg transition-opacity duration-300';
         toast.textContent = 'Note copied successfully';
         document.body.appendChild(toast);
         
-        // Reset button and remove toast after 2 seconds
         setTimeout(() => {
             button.innerHTML = originalHTML;
             lucide.createIcons();
@@ -196,6 +204,7 @@ editor.addEventListener('input', async (e) => {
         }, 200);
     } else if (text === '') {
         window.history.replaceState({}, '', window.location.pathname);
+        displayNotes(); // Add this line to refresh notes when search is cleared
     }
 });
 

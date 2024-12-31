@@ -1,5 +1,5 @@
 use axum::{
-    extract::{DefaultBodyLimit, Multipart, Path, State},
+    extract::{DefaultBodyLimit, Multipart, Path, Query, State},
     http::StatusCode,
     response::{Html, IntoResponse},
     routing::{get, post},
@@ -82,6 +82,8 @@ async fn main() {
         .route("/upload", post(upload_file))
         .route("/css/main.css", get(serve_css))
         .route("/js/main.js", get(serve_js))
+        .route("/notes/search", get(search_notes))
+        .route("/notes/:index/content", get(get_note_content))
         .layer(DefaultBodyLimit::max(CONTENT_LENGTH_LIMIT))
         .nest_service("/attachments", ServeDir::new("attachments"))
         .with_state(state);
@@ -319,6 +321,45 @@ async fn serve_css() -> impl IntoResponse {
 
 async fn serve_js() -> impl IntoResponse {
     ([("Content-Type", "application/javascript")], JS_FILE)
+}
+
+// Add new handler functions
+#[derive(Deserialize)]
+struct SearchQuery {
+    q: String,
+}
+
+// GET /notes/search
+async fn search_notes(
+    State(state): State<AppState>,
+    query: Query<SearchQuery>,
+) -> Json<Vec<Note>> {
+    let notes = state.notes.lock().unwrap();
+    let filtered: Vec<Note> = notes
+        .iter()
+        .filter(|note| {
+            note.content
+                .to_lowercase()
+                .contains(&query.q.to_lowercase())
+        })
+        .cloned()
+        .collect();
+    Json(filtered)
+}
+
+// GET /notes/:index/content
+async fn get_note_content(
+    State(state): State<AppState>,
+    Path(index): Path<usize>,
+) -> Result<String, (StatusCode, String)> {
+    let notes = state.notes.lock().unwrap();
+    if index >= notes.len() {
+        return Err((
+            StatusCode::NOT_FOUND,
+            format!("Note #{index} not found"),
+        ));
+    }
+    Ok(notes[index].content.clone())
 }
 
 // UTILS
