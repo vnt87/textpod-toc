@@ -87,3 +87,25 @@ html, body {
 .transition-opacity {
     transition: opacity 0.3s ease-in-out;
 }
+
+/* Scrollbar styling */
+.toc::-webkit-scrollbar {
+    width: 8px;
+}
+
+.toc::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.toc::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 4px;
+}
+
+.dark .toc::-webkit-scrollbar-thumb {
+    background: #4b5563;
+}
+
+.dark .toc::-webkit-scrollbar-thumb:hover {
+    background: #374151;
+}
