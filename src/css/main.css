@@ -78,6 +78,17 @@ html, body {
         z-index: 50;
         max-height: calc(100vh - 7rem);
     }
+    
+    #tocToggle {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+        font-size: 0;
+    }
+    
+    #tocToggle i {
+        margin-right: 0;
+        font-size: 1rem;
+    }
 }
 
 .fixed {
