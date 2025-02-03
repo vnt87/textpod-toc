@@ -218,6 +218,15 @@ submitButton.addEventListener('click', async (e) => {
     saveNotes();
 });
 
+// Interactive hover effect for Submit button
+submitButton.addEventListener('mousemove', (e) => {
+    const rect = e.target.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    e.target.style.setProperty('--x', `${x}px`);
+    e.target.style.setProperty('--y', `${y}px`);
+});
+
 editor.addEventListener('dragover', (e) => {
     e.preventDefault();
 });
