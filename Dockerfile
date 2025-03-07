@@ -1,30 +1,17 @@
-FROM rust:alpine AS builder
-
-# Install build dependencies
-RUN apk add --no-cache musl-dev
-
-WORKDIR /usr/src/textpod
-COPY . .
-
-# Build for musl target
-RUN rustup target add x86_64-unknown-linux-musl && \
-    cargo build --release --target x86_64-unknown-linux-musl && \
-    strip /usr/src/textpod/target/x86_64-unknown-linux-musl/release/textpod
-
-FROM alpine:3.19
-
-# Install only netcat-openbsd for healthcheck
-RUN apk add --no-cache netcat-openbsd
-
-COPY --from=builder /usr/src/textpod/target/x86_64-unknown-linux-musl/release/textpod /usr/local/bin/textpod
-
+FROM rust:1-slim-bookworm as builder
 WORKDIR /app
-VOLUME /app
+COPY . .
+RUN cargo build --release
 
-HEALTHCHECK --interval=60s --retries=3 --timeout=1s \
-    CMD nc -z -w 1 localhost 3000 || exit 1
+FROM debian:bookworm-slim
+WORKDIR /app
+ENV DATA_DIR=/app/data
 
+RUN apt-get update && \
+    apt-get install -y ca-certificates libssl-dev && \
+    rm -rf /var/lib/apt/lists/* && \
+    mkdir -p ${DATA_DIR}/attachments ${DATA_DIR}/attachments/webpages
+
+COPY --from=builder /app/target/release/textpod-daisyui /app/
 EXPOSE 3000
-
-ENTRYPOINT ["textpod"]
-CMD ["-p", "3000", "-l", "0.0.0.0"]
+CMD ["/app/textpod-daisyui"]

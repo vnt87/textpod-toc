@@ -59,7 +59,12 @@ async fn main() {
     tracing_subscriber::fmt::init();
 
     let args = Args::parse();
-    fs::create_dir_all("attachments").unwrap();
+    
+    // Set up data directory from environment variable
+    let data_dir = std::env::var("DATA_DIR").unwrap_or(".".into());
+    fs::create_dir_all(&data_dir).unwrap();
+    fs::create_dir_all(&format!("{}/attachments", data_dir)).unwrap();
+    fs::create_dir_all(&format!("{}/attachments/webpages", data_dir)).unwrap();
 
     let favicon = Base64Display::new(FAVICON_SVG, &STANDARD);
     let html = INDEX_HTML.replace(
@@ -85,7 +90,10 @@ async fn main() {
         .route("/notes/search", get(search_notes))
         .route("/notes/:index/content", get(get_note_content))
         .layer(DefaultBodyLimit::max(CONTENT_LENGTH_LIMIT))
-        .nest_service("/attachments", ServeDir::new("attachments"))
+        .nest_service(
+            "/attachments", 
+            ServeDir::new(format!("{}/attachments", std::env::var("DATA_DIR").unwrap_or(".".into())))
+        )
         .with_state(state);
 
     let server_details = format!("{}:{}", args.listen, args.port);
@@ -107,7 +115,10 @@ async fn main() {
 }
 
 fn load_notes() -> Vec<Note> {
-    if let Ok(content) = fs::read_to_string("notes.md") {
+    let data_dir = std::env::var("DATA_DIR").unwrap_or(".".into());
+    let notes_path = format!("{}/notes.md", data_dir);
+    
+    if let Ok(content) = fs::read_to_string(&notes_path) {
         content
             .split("\n\n---\n\n")
             .filter(|s| !s.trim().is_empty())
@@ -184,7 +195,9 @@ async fn delete_note_by_index(
         .map(|note| format!("{}\n{}\n\n---\n\n", note.timestamp, note.content))
         .collect::<String>();
 
-    if let Err(e) = fs::write("notes.md", content) {
+    let data_dir = std::env::var("DATA_DIR").unwrap_or(".".into());
+    let notes_path = format!("{}/notes.md", data_dir);
+    if let Err(e) = fs::write(&notes_path, content) {
         return Err((StatusCode::INTERNAL_SERVER_ERROR, e.to_string()));
     }
 
@@ -200,6 +213,7 @@ async fn save_note(
     Json(content): Json<String>,
 ) -> Result<(), StatusCode> {
     let mut content = content.clone();
+    let data_dir = std::env::var("DATA_DIR").unwrap_or(".".into());
 
     // Replace "---" with "<hr>" in the content
     content = content.replace("---", "<hr>");
@@ -209,17 +223,17 @@ async fn save_note(
         .map(|s| s.to_string())
         .collect();
 
-    fs::create_dir_all("attachments/webpages").unwrap();
+    fs::create_dir_all(&format!("{}/attachments/webpages", data_dir)).unwrap();
 
     for link in &links_to_download {
         let url = &link[1..];
         let escaped_filename = url_to_safe_filename(url);
-        let filepath = format!("attachments/webpages/{}.html", escaped_filename);
+        let filepath = format!("{}/attachments/webpages/{}.html", data_dir, escaped_filename);
         content = content.replace(link, &format!("{} ([local copy](/{}))", url, filepath));
     }
 
     let timestamp = Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
-    let html = md_to_html(&content); // Changed to pass a reference
+    let html = md_to_html(&content);
     let note = Note {
         timestamp: timestamp.clone(),
         content: content.clone(),
@@ -228,10 +242,11 @@ async fn save_note(
 
     state.notes.lock().unwrap().push(note);
 
+    let notes_path = format!("{}/notes.md", data_dir);
     let mut file = fs::OpenOptions::new()
         .create(true)
         .append(true)
-        .open("notes.md")
+        .open(&notes_path)
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
     write!(file, "{}\n{}\n\n---\n\n", timestamp, content)
@@ -241,11 +256,12 @@ async fn save_note(
 
     if !links_to_download.is_empty() {
         let notes = state.notes.clone();
+        let data_dir = data_dir.clone();
         spawn(async move {
             for link in links_to_download {
                 let url = &link[1..];
                 let escaped_filename = url_to_safe_filename(url);
-                let filepath = format!("attachments/webpages/{}.html", escaped_filename);
+                let filepath = format!("{}/attachments/webpages/{}.html", data_dir, escaped_filename);
 
                 let result = Command::new("monolith")
                     .args(&[url, "-o", &filepath])
@@ -263,11 +279,12 @@ async fn save_note(
                             "(local copy failed)",
                         );
                         last_note.content = updated_content.clone();
-                        last_note.html = md_to_html(&updated_content); // Changed to pass a reference here too
+                        last_note.html = md_to_html(&updated_content);
 
                         drop(notes_lock);
 
-                        if let Ok(file_content) = fs::read_to_string("notes.md") {
+                        let notes_path = format!("{}/notes.md", data_dir);
+                        if let Ok(file_content) = fs::read_to_string(&notes_path) {
                             let notes_lock = notes.lock().unwrap();
                             let updated_content: Vec<String> = file_content
                                 .split("\n---\n")
@@ -282,7 +299,7 @@ async fn save_note(
                                 .collect();
                             drop(notes_lock);
 
-                            if let Ok(mut file) = fs::File::create("notes.md") {
+                            if let Ok(mut file) = fs::File::create(&notes_path) {
                                 for note_content in updated_content {
                                     writeln!(file, "{}\n---", note_content).ok();
                                 }
@@ -299,12 +316,14 @@ async fn save_note(
 
 // route POST /upload
 async fn upload_file(mut multipart: Multipart) -> Result<Json<String>, StatusCode> {
+    let data_dir = std::env::var("DATA_DIR").unwrap_or(".".into());
+    
     while let Some(field) = multipart.next_field().await.unwrap() {
         let name = field.file_name().unwrap().to_string();
         let data = field.bytes().await.unwrap();
 
         info!("Uploading file: {}", name);
-        let path = PathBuf::from("attachments").join(&name);
+        let path = PathBuf::from(&format!("{}/attachments", data_dir)).join(&name);
         fs::write(path, data).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
         return Ok(Json(format!("/attachments/{}", name)));

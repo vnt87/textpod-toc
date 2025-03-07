@@ -1,10 +1,16 @@
+version: '3.8'
+
 services:
-  textpod:
-    image: ghcr.io/vnt87/textpod-toc:latest
+  app:
     build: .
     ports:
-      - '3000:3000'
+      - "3000:3000"
     volumes:
-      - './data:/app'
-    container_name: textpod-toc
-    restart: unless-stopped
+      - textpod_data:/app/data
+      - ./backups:/app/backups
+    environment:
+      - LISTEN=0.0.0.0
+
+volumes:
+  textpod_data:
+    name: textpod_data

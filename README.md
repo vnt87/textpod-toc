@@ -21,7 +21,10 @@ This is a fork of [freetonik/textpod](https://github.com/freetonik/textpod) but 
 The easiest way to run Textpod is using Docker:
 
 ```bash
-docker run -d -p 3000:3000 -v $(pwd)/data:/app ghcr.io/vnt87/textpod-toc:latest
+docker run -d -p 3000:3000 \
+  -v textpod_data:/app/data \
+  -v $(pwd)/backups:/app/backups \
+  ghcr.io/vnt87/textpod-toc:latest
 ```
 
 Or using docker-compose:
@@ -29,6 +32,16 @@ Or using docker-compose:
 ```bash
 wget https://raw.githubusercontent.com/vnt87/textpod-toc/refs/heads/main/docker-compose.yml
 docker compose up -d
+```
+
+The application uses two storage locations:
+- `/app/data`: Main storage directory for notes and attachments (persisted in Docker volume)
+- `/app/backups`: Optional backup directory, mapped to local `./backups` folder
+
+To migrate existing data from a previous installation:
+```bash
+mkdir -p backups
+docker run --rm -v textpod_data:/data -v $(pwd):/backup alpine sh -c "cp -r /backup/data/* /data/"
 ```
 
 ### Option 2: Building from source
