@@ -15,6 +15,6 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir -p ${DATA_DIR}/attachments ${DATA_DIR}/attachments/webpages
 
-COPY --from=builder /app/target/release/textpod-daisyui /app/textpod-daisyui
+COPY --from=builder /app/target/release/textpod /app/textpod
 EXPOSE 3000
-CMD ["/app/textpod-daisyui"]
+CMD ["/app/textpod"]
