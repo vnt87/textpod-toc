@@ -50,6 +50,29 @@
                     <button id="submitButton" class="interactive-btn text-white bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm dark:bg-blue-600 focus:outline-none dark:focus:ring-blue-800">Submit</button>
                 </div>
 
+                <div class="flex justify-between items-center mb-6">
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-2">
+                            <span class="text-gray-700 dark:text-gray-300">Items per page:</span>
+                            <select id="itemsPerPage" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                        <span id="showingCount" class="text-gray-700 dark:text-gray-300"></span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="prevPage" class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-3 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">
+                            <i data-lucide="chevron-left" class="w-4 h-4 inline-block"></i>
+                        </button>
+                        <span id="pageInfo" class="text-gray-700 dark:text-gray-300"></span>
+                        <button id="nextPage" class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-3 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">
+                            <i data-lucide="chevron-right" class="w-4 h-4 inline-block"></i>
+                        </button>
+                    </div>
+                </div>
+
                 <div id="notes">
                     <!-- Notes will be dynamically inserted here -->
                 </div>

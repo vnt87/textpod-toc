@@ -72,7 +72,12 @@ async function displayNotes() {
         const notes = await response.json();
         const filteredNotes = notes.filter(note => 
             !searchQuery || note.content.toLowerCase().includes(searchQuery.toLowerCase())
-        );
+        ).sort((a, b) => {
+            const dateA = new Date(a.timestamp);
+            const dateB = new Date(b.timestamp);
+            console.log(`Sorting: ${a.timestamp} (${dateA.getTime()}) vs ${b.timestamp} (${dateB.getTime()})`);
+            return dateB.getTime() - dateA.getTime(); // Sort by timestamp descending (newest first)
+        });
 
         // Process the HTML content to add target="_blank" to links
         filteredNotes.forEach(note => {
@@ -87,9 +92,21 @@ async function displayNotes() {
             note.html = div.innerHTML;
         });
 
-        notesDiv.innerHTML = filteredNotes
+        // Pagination logic
+        let currentPage = parseInt(localStorage.getItem('currentPage')) || 1;
+        let itemsPerPage = parseInt(localStorage.getItem('itemsPerPage')) || 20;
+        const totalNotes = filteredNotes.length;
+        const totalPages = Math.ceil(totalNotes / itemsPerPage);
+        currentPage = Math.min(currentPage, totalPages) || 1;
+
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const paginatedNotes = filteredNotes.slice(startIndex, endIndex);
+
+        notesDiv.innerHTML = paginatedNotes
             .map((note, i) => {
-                const noteId = `note-${i}`;
+                const globalIndex = startIndex + i;
+                const noteId = `note-${globalIndex}`;
                 return `
                 <div id="${noteId}" class="note bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-4">
                     <div class="note-content prose dark:prose-invert max-w-none text-gray-900 dark:text-white">
@@ -101,31 +118,86 @@ async function displayNotes() {
                             <time datetime="${note.timestamp}">${note.timestamp}</time>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button onclick="copyNote(${i}, this)" class="text-gray-600 hover:text-gray-800 dark:text-gray-500 dark:hover:text-gray-400" title="Copy note">
+                            <button onclick="copyNote(${globalIndex}, this)" class="text-gray-600 hover:text-gray-800 dark:text-gray-500 dark:hover:text-gray-400" title="Copy note">
                                 <i data-lucide="copy" class="w-4 h-4"></i>
                             </button>
-                            <button onclick="deleteNote(${i})" class="text-red-600 hover:text-red-800 dark:text-red-500 dark:hover:text-red-400" title="Delete note">
+                            <button onclick="deleteNote(${globalIndex})" class="text-red-600 hover:text-red-800 dark:text-red-500 dark:hover:text-red-400" title="Delete note">
                                 <i data-lucide="trash-2" class="w-4 h-4"></i>
                             </button>
                         </div>
                     </div>
                 </div>`;
             })
-            .reverse()
             .join('');
+
+        // Update pagination controls
+        const pageInfo = document.getElementById('pageInfo');
+        const showingCount = document.getElementById('showingCount');
+        const startItem = startIndex + 1;
+        const endItem = Math.min(endIndex, totalNotes);
+        showingCount.textContent = `Showing ${startItem}-${endItem} of ${totalNotes}`;
+        document.getElementById('prevPage').disabled = currentPage === 1;
+        document.getElementById('nextPage').disabled = currentPage === totalPages || totalPages === 0;
+        localStorage.setItem('currentPage', currentPage);
+
+        // Generate page number sequence
+        let pageNumbers = '';
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+        if (endPage - startPage < maxVisiblePages - 1) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+        for (let i = startPage; i <= endPage; i++) {
+            if (i === currentPage) {
+                pageNumbers += `<span class="text-blue-700 dark:text-blue-400 font-medium">${i}</span>`;
+            } else {
+                pageNumbers += `<a href="#" onclick="event.preventDefault(); goToPage(${i});" class="text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 px-2">${i}</a>`;
+            }
+        }
+        pageInfo.innerHTML = pageNumbers;
 
         const tocContent = document.getElementById('tocContent');
         tocContent.innerHTML = filteredNotes
             .map((note, i) => {
                 const title = note.content.split('\n')[0].slice(0, 20) + 
                     (note.content.split('\n')[0].length > 20 ? '...' : '');
-                return `<a href="#note-${i}" class="block py-2 px-3 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" onclick="event.preventDefault(); smoothScroll(document.getElementById('note-${i}'))">${title}</a>`;
+                const pageForNote = Math.ceil((i + 1) / itemsPerPage);
+                return `<a href="#note-${i}" class="block py-2 px-3 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" onclick="event.preventDefault(); goToPage(${pageForNote}, () => smoothScroll(document.getElementById('note-${i}')));">${title}</a>`;
             })
-            .reverse()
             .join('');
     }
     lucide.createIcons();
 }
+
+// Pagination navigation
+function goToPage(page, callback) {
+    localStorage.setItem('currentPage', page);
+    displayNotes().then(() => {
+        if (callback) callback();
+    });
+}
+
+document.getElementById('prevPage').addEventListener('click', () => {
+    let currentPage = parseInt(localStorage.getItem('currentPage')) || 1;
+    if (currentPage > 1) {
+        goToPage(currentPage - 1);
+    }
+});
+
+document.getElementById('nextPage').addEventListener('click', () => {
+    let currentPage = parseInt(localStorage.getItem('currentPage')) || 1;
+    goToPage(currentPage + 1);
+});
+
+document.getElementById('itemsPerPage').addEventListener('change', (e) => {
+    localStorage.setItem('itemsPerPage', e.target.value);
+    localStorage.setItem('currentPage', 1); // Reset to first page on items per page change
+    displayNotes();
+});
+
+// Initialize items per page dropdown value
+document.getElementById('itemsPerPage').value = localStorage.getItem('itemsPerPage') || 20;
 
 async function saveNotes() {
     if (!editor.value) {
