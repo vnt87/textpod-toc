@@ -17,5 +17,7 @@ RUN apt-get update && \
 
 COPY --from=builder /app/target/release/textpod /app/textpod
 RUN chmod +x /app/textpod
+RUN apt-get update && apt-get install -y libc6 libgcc1 && rm -rf /var/lib/apt/lists/*
+RUN ls -la /app/
 EXPOSE 3000
 CMD ["/app/textpod"]
