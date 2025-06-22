@@ -16,5 +16,6 @@ RUN apt-get update && \
     mkdir -p ${DATA_DIR}/attachments ${DATA_DIR}/attachments/webpages
 
 COPY --from=builder /app/target/release/textpod /app/textpod
+RUN chmod +x /app/textpod
 EXPOSE 3000
 CMD ["/app/textpod"]
