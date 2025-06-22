@@ -20,6 +20,5 @@ COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/textpod /app/t
 RUN chmod +x /app/textpod
 RUN apt-get update && apt-get install -y libc6 libgcc1 && rm -rf /var/lib/apt/lists/*
 RUN ls -la /app/
-RUN file /app/textpod
 EXPOSE 3000
 CMD ["/app/textpod"]
