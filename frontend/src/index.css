@@ -85,3 +85,15 @@ body {
 .dark .toc-scrollbar::-webkit-scrollbar-thumb {
   background: theme(colors.zinc.600);
 }
+
+/* Scroll reveal animation for note cards */
+.note-card-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.note-card-reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}

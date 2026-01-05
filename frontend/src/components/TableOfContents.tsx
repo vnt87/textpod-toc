@@ -1,4 +1,5 @@
 import { type Note } from '../api/notes';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 interface TableOfContentsProps {
     notes: Note[];
@@ -8,7 +9,7 @@ interface TableOfContentsProps {
     onClose?: () => void;
 }
 
-export function TableOfContents({ notes, isVisible, pageSize, onNoteClick }: TableOfContentsProps) {
+export function TableOfContents({ notes, isVisible, pageSize, onNoteClick, onClose }: TableOfContentsProps) {
     const getTitle = (content: string) => {
         const firstLine = content.split('\n')[0];
         return firstLine.length > 30 ? firstLine.slice(0, 30) + '...' : firstLine;
@@ -23,6 +24,7 @@ export function TableOfContents({ notes, isVisible, pageSize, onNoteClick }: Tab
                     transition-opacity duration-300
                     ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}
                 `}
+                onClick={onClose}
             />
 
             {/* Sidebar */}
@@ -39,12 +41,21 @@ export function TableOfContents({ notes, isVisible, pageSize, onNoteClick }: Tab
             >
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-700">
-                    <h4 className="text-lg font-semibold text-zinc-900 dark:text-white">
-                        Table of Contents
-                    </h4>
-                    <span className="text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-700 px-2 py-1 rounded-full">
-                        {notes.length} notes
-                    </span>
+                    <div className="flex items-center gap-2">
+                        <h4 className="text-lg font-semibold text-zinc-900 dark:text-white">
+                            Table of Contents
+                        </h4>
+                        <span className="text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-700 px-2 py-1 rounded-full">
+                            {notes.length} notes
+                        </span>
+                    </div>
+                    <button
+                        onClick={onClose}
+                        className="p-1 text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors lg:hidden"
+                        aria-label="Close table of contents"
+                    >
+                        <XMarkIcon className="w-5 h-5" />
+                    </button>
                 </div>
 
                 {/* Notes list */}

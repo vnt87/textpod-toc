@@ -107,6 +107,7 @@ function App() {
           isVisible={tocVisible}
           pageSize={pagination.pageSize}
           onNoteClick={handleTocNoteClick}
+          onClose={() => setTocVisible(false)}
         />
 
         <div>
@@ -152,6 +153,7 @@ function App() {
                         onCopy={handleCopy}
                         onDelete={handleDelete}
                         isHighlighted={highlightedNote === globalIndex}
+                        revealDelay={idx * 50}
                       />
                     );
                   })}

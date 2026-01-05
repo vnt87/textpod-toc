@@ -1,3 +1,4 @@
+import { useRef, useEffect, useState } from 'react';
 import { ClockIcon, DocumentDuplicateIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { type Note } from '../api/notes';
 
@@ -7,9 +8,38 @@ interface NoteCardProps {
     onCopy: (index: number) => void;
     onDelete: (index: number) => void;
     isHighlighted?: boolean;
+    revealDelay?: number;
 }
 
-export function NoteCard({ note, index, onCopy, onDelete, isHighlighted }: NoteCardProps) {
+export function NoteCard({ note, index, onCopy, onDelete, isHighlighted, revealDelay = 0 }: NoteCardProps) {
+    const cardRef = useRef<HTMLDivElement>(null);
+    const [isRevealed, setIsRevealed] = useState(false);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting && !isRevealed) {
+                        // Add staggered delay for smoother cascade effect
+                        setTimeout(() => {
+                            setIsRevealed(true);
+                        }, revealDelay);
+                    }
+                });
+            },
+            {
+                threshold: 0.1, // Trigger when 10% of card is visible
+                rootMargin: '0px 0px -50px 0px' // Slightly before entering viewport
+            }
+        );
+
+        if (cardRef.current) {
+            observer.observe(cardRef.current);
+        }
+
+        return () => observer.disconnect();
+    }, [revealDelay, isRevealed]);
+
     const handleDelete = () => {
         if (window.confirm('Are you sure you want to delete this note?')) {
             onDelete(index);
@@ -18,8 +48,9 @@ export function NoteCard({ note, index, onCopy, onDelete, isHighlighted }: NoteC
 
     return (
         <div
+            ref={cardRef}
             id={`note-${index}`}
-            className={`bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 p-4 mb-4 ${isHighlighted ? 'note-highlight' : ''
+            className={`note-card-reveal ${isRevealed ? 'revealed' : ''} bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 p-4 mb-4 ${isHighlighted ? 'note-highlight' : ''
                 }`}
         >
             <div
