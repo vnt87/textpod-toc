@@ -24,9 +24,7 @@ export function Header({ isDark, onThemeToggle, isTocVisible, onTocToggle }: Hea
                 </Button>
             </div>
             <Button
-                color={isTocVisible ? 'blue' : 'dark'}
-                plain={!isTocVisible}
-                outline={isTocVisible}
+                {...(isTocVisible ? { color: 'blue' } : { plain: true })}
                 onClick={onTocToggle}
             >
                 <ListBulletIcon className="w-4 h-4" />
