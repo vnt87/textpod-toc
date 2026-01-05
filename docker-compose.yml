@@ -1,10 +1,8 @@
-version: '3.8'
-
 services:
   app:
-    build: .
+    image: ghcr.io/vnt87/textpod-toc:latest
     ports:
-      - "3000:3000"
+      - "8818:3000"
     volumes:
       - textpod_data:/app/data
       - ./backups:/app/backups
