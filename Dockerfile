@@ -1,3 +1,12 @@
+# Build frontend
+FROM node:20-slim AS frontend-builder
+WORKDIR /app/frontend
+COPY frontend/package*.json ./
+RUN npm ci
+COPY frontend/ .
+RUN npm run build
+
+# Build backend
 FROM rust:1-slim-bookworm AS builder
 WORKDIR /app
 COPY . .
@@ -7,9 +16,11 @@ RUN apt-get update && \
     cargo build --release --target x86_64-unknown-linux-musl && \
     ls -la /app/target/x86_64-unknown-linux-musl/release/
 
+# Final image
 FROM debian:bookworm-slim
 WORKDIR /app
 ENV DATA_DIR=/app/data
+ENV FRONTEND_DIR=/app/frontend
 
 RUN apt-get update && \
     apt-get install -y ca-certificates libssl-dev && \
@@ -17,6 +28,8 @@ RUN apt-get update && \
     mkdir -p ${DATA_DIR}/attachments ${DATA_DIR}/attachments/webpages
 
 COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/textpod /app/textpod
+COPY --from=frontend-builder /app/frontend/dist /app/frontend
+
 RUN chmod +x /app/textpod
 RUN apt-get update && apt-get install -y libc6 libgcc1 && rm -rf /var/lib/apt/lists/*
 RUN ls -la /app/

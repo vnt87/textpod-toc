@@ -1,11 +1,10 @@
 use axum::{
     extract::{DefaultBodyLimit, Multipart, Path, Query, State},
-    http::StatusCode,
-    response::{Html, IntoResponse},
+    http::{StatusCode, Uri},
+    response::{Html, IntoResponse, Response},
     routing::{get, post},
     Json, Router,
 };
-use base64::{display::Base64Display, engine::general_purpose::STANDARD};
 use chrono::Local;
 use clap::Parser;
 use comrak::{markdown_to_html, Options};
@@ -22,11 +21,6 @@ use tokio::spawn;
 use tower_http::services::ServeDir;
 use tracing::{error, info};
 use tracing_subscriber;
-
-const INDEX_HTML: &str = include_str!("index.html");
-const FAVICON_SVG: &[u8] = include_bytes!("favicon.svg");
-const CSS_FILE: &str = include_str!("css/main.css");
-const JS_FILE: &str = include_str!("js/main.js");
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -48,7 +42,6 @@ struct Note {
 
 #[derive(Clone)]
 struct AppState {
-    html: String,
     notes: Arc<Mutex<Vec<Note>>>,
 }
 
@@ -59,40 +52,39 @@ async fn main() {
     tracing_subscriber::fmt::init();
 
     let args = Args::parse();
-    
+
     // Set up data directory from environment variable
     let data_dir = std::env::var("DATA_DIR").unwrap_or(".".into());
+    let frontend_dir = std::env::var("FRONTEND_DIR").unwrap_or("./frontend/dist".into());
+
     fs::create_dir_all(&data_dir).unwrap();
     fs::create_dir_all(&format!("{}/attachments", data_dir)).unwrap();
     fs::create_dir_all(&format!("{}/attachments/webpages", data_dir)).unwrap();
 
-    let favicon = Base64Display::new(FAVICON_SVG, &STANDARD);
-    let html = INDEX_HTML.replace(
-        "{{FAVICON}}",
-        format!("data:image/svg+xml;base64,{favicon}").as_str(),
-    );
-
     let state = AppState {
-        html,
         notes: Arc::new(Mutex::new(load_notes())),
     };
 
     let app = Router::new()
-        .route("/", get(index))
         .route("/notes", get(get_notes).post(save_note))
         .route(
             "/notes/:index",
             get(get_note_by_index).delete(delete_note_by_index),
         ) // TODO PUT/PATCH
         .route("/upload", post(upload_file))
-        .route("/css/main.css", get(serve_css))
-        .route("/js/main.js", get(serve_js))
         .route("/notes/search", get(search_notes))
         .route("/notes/:index/content", get(get_note_content))
         .layer(DefaultBodyLimit::max(CONTENT_LENGTH_LIMIT))
         .nest_service(
-            "/attachments", 
-            ServeDir::new(format!("{}/attachments", std::env::var("DATA_DIR").unwrap_or(".".into())))
+            "/attachments",
+            ServeDir::new(format!(
+                "{}/attachments",
+                std::env::var("DATA_DIR").unwrap_or(".".into())
+            )),
+        )
+        .nest_service(
+            "/",
+            ServeDir::new(frontend_dir).fallback(get(index_fallback)),
         )
         .with_state(state);
 
@@ -114,10 +106,20 @@ async fn main() {
     }
 }
 
+async fn index_fallback() -> impl IntoResponse {
+    let frontend_dir = std::env::var("FRONTEND_DIR").unwrap_or("./frontend/dist".into());
+    let index_path = PathBuf::from(frontend_dir).join("index.html");
+
+    match fs::read_to_string(index_path) {
+        Ok(html) => Html(html).into_response(),
+        Err(_) => (StatusCode::NOT_FOUND, "index.html not found").into_response(),
+    }
+}
+
 fn load_notes() -> Vec<Note> {
     let data_dir = std::env::var("DATA_DIR").unwrap_or(".".into());
     let notes_path = format!("{}/notes.md", data_dir);
-    
+
     if let Ok(content) = fs::read_to_string(&notes_path) {
         content
             .split("\n\n---\n\n")
@@ -145,11 +147,6 @@ fn load_notes() -> Vec<Note> {
     } else {
         Vec::new()
     }
-}
-
-// route / (root)
-async fn index(State(state): State<AppState>) -> Html<String> {
-    Html(state.html)
 }
 
 // GET /notes
@@ -228,7 +225,10 @@ async fn save_note(
     for link in &links_to_download {
         let url = &link[1..];
         let escaped_filename = url_to_safe_filename(url);
-        let filepath = format!("{}/attachments/webpages/{}.html", data_dir, escaped_filename);
+        let filepath = format!(
+            "{}/attachments/webpages/{}.html",
+            data_dir, escaped_filename
+        );
         content = content.replace(link, &format!("{} ([local copy](/{}))", url, filepath));
     }
 
@@ -261,7 +261,10 @@ async fn save_note(
             for link in links_to_download {
                 let url = &link[1..];
                 let escaped_filename = url_to_safe_filename(url);
-                let filepath = format!("{}/attachments/webpages/{}.html", data_dir, escaped_filename);
+                let filepath = format!(
+                    "{}/attachments/webpages/{}.html",
+                    data_dir, escaped_filename
+                );
 
                 let result = Command::new("monolith")
                     .args(&[url, "-o", &filepath])
@@ -317,7 +320,7 @@ async fn save_note(
 // route POST /upload
 async fn upload_file(mut multipart: Multipart) -> Result<Json<String>, StatusCode> {
     let data_dir = std::env::var("DATA_DIR").unwrap_or(".".into());
-    
+
     while let Some(field) = multipart.next_field().await.unwrap() {
         let name = field.file_name().unwrap().to_string();
         let data = field.bytes().await.unwrap();
@@ -333,26 +336,13 @@ async fn upload_file(mut multipart: Multipart) -> Result<Json<String>, StatusCod
     Err(StatusCode::BAD_REQUEST)
 }
 
-// Add new handler functions
-async fn serve_css() -> impl IntoResponse {
-    ([("Content-Type", "text/css")], CSS_FILE)
-}
-
-async fn serve_js() -> impl IntoResponse {
-    ([("Content-Type", "application/javascript")], JS_FILE)
-}
-
-// Add new handler functions
 #[derive(Deserialize)]
 struct SearchQuery {
     q: String,
 }
 
 // GET /notes/search
-async fn search_notes(
-    State(state): State<AppState>,
-    query: Query<SearchQuery>,
-) -> Json<Vec<Note>> {
+async fn search_notes(State(state): State<AppState>, query: Query<SearchQuery>) -> Json<Vec<Note>> {
     let notes = state.notes.lock().unwrap();
     let filtered: Vec<Note> = notes
         .iter()
@@ -373,10 +363,7 @@ async fn get_note_content(
 ) -> Result<String, (StatusCode, String)> {
     let notes = state.notes.lock().unwrap();
     if index >= notes.len() {
-        return Err((
-            StatusCode::NOT_FOUND,
-            format!("Note #{index} not found"),
-        ));
+        return Err((StatusCode::NOT_FOUND, format!("Note #{index} not found")));
     }
     Ok(notes[index].content.clone())
 }
