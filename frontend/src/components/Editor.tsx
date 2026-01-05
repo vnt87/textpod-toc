@@ -86,7 +86,8 @@ export function Editor({ onSubmit, onSearch }: EditorProps) {
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
                 placeholder={`Ctrl+Enter to save.\nType / to search.\nDrag & drop files to attach.\nStart links with + to save local copies.`}
-                className="mb-4"
+                className="mb-4 min-h-[200px]"
+                rows={8}
             />
             <div className="flex justify-end">
                 <Button

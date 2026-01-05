@@ -94,7 +94,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-zinc-100 dark:bg-zinc-900 transition-colors">
-      <div className="container mx-auto p-4 max-w-6xl">
+      <div className={`container mx-auto p-4 max-w-6xl transition-all duration-300 ${tocVisible ? 'lg:pr-72' : ''}`}>
         <Header
           isDark={isDark}
           onThemeToggle={toggleTheme}
@@ -102,7 +102,14 @@ function App() {
           onTocToggle={handleTocToggle}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr,280px] gap-8">
+        <TableOfContents
+          notes={notes}
+          isVisible={tocVisible}
+          pageSize={pagination.pageSize}
+          onNoteClick={handleTocNoteClick}
+        />
+
+        <div>
           <main>
             <Editor onSubmit={handleSubmit} onSearch={setSearchQuery} />
 
@@ -158,13 +165,6 @@ function App() {
               </>
             )}
           </main>
-
-          <TableOfContents
-            notes={notes}
-            isVisible={tocVisible}
-            pageSize={pagination.pageSize}
-            onNoteClick={handleTocNoteClick}
-          />
         </div>
 
         <footer className="mt-12 pb-8 text-center">
