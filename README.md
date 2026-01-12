@@ -12,6 +12,7 @@ This is a fork of [freetonik/textpod](https://github.com/freetonik/textpod) but 
 - Fast and lightweight
 - Responsive design
 
+Screenshot: 2026 Tailwind version
 ![screenshot](screenshot2026.png)
 
 For the old version which uses Flowbite & Font Awesome

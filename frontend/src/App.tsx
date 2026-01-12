@@ -171,7 +171,7 @@ function App() {
 
         <footer className="mt-12 pb-8 text-center">
           <div className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">
-            Crafted with ❤️ by VNTools
+            Crafted with ❤️ by NVAI
           </div>
           <div className="text-xs text-zinc-500 dark:text-zinc-400">
             Textpod created by{' '}
