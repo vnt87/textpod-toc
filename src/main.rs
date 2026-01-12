@@ -26,10 +26,10 @@ use tracing_subscriber;
 #[command(author, version, about, long_about = None)]
 struct Args {
     /// Port number for the server
-    #[arg(short, long, default_value_t = 3000)]
+    #[arg(short, long, default_value_t = 3000, env = "PORT")]
     port: u16,
     /// Listen address for the server
-    #[arg(short, long, default_value_t = String::from("127.0.0.1"))]
+    #[arg(short, long, default_value_t = String::from("127.0.0.1"), env = "LISTEN")]
     listen: String,
 }
 
@@ -56,6 +56,19 @@ async fn main() {
     // Set up data directory from environment variable
     let data_dir = std::env::var("DATA_DIR").unwrap_or(".".into());
     let frontend_dir = std::env::var("FRONTEND_DIR").unwrap_or("./frontend/dist".into());
+
+    info!("Using FRONTEND_DIR: {}", frontend_dir);
+    match fs::read_dir(&frontend_dir) {
+        Ok(entries) => {
+            info!("Listing files in FRONTEND_DIR:");
+            for entry in entries {
+                if let Ok(entry) = entry {
+                    info!(" - {:?}", entry.file_name());
+                }
+            }
+        }
+        Err(e) => error!("Could not read FRONTEND_DIR at '{}': {}", frontend_dir, e),
+    }
 
     fs::create_dir_all(&data_dir).unwrap();
     fs::create_dir_all(&format!("{}/attachments", data_dir)).unwrap();
@@ -106,13 +119,17 @@ async fn main() {
     }
 }
 
-async fn index_fallback() -> impl IntoResponse {
+async fn index_fallback(uri: Uri) -> impl IntoResponse {
+    info!("Index fallback triggered for: {}", uri);
     let frontend_dir = std::env::var("FRONTEND_DIR").unwrap_or("./frontend/dist".into());
     let index_path = PathBuf::from(frontend_dir).join("index.html");
 
-    match fs::read_to_string(index_path) {
+    match fs::read_to_string(&index_path) {
         Ok(html) => Html(html).into_response(),
-        Err(_) => (StatusCode::NOT_FOUND, "index.html not found").into_response(),
+        Err(e) => {
+            error!("Failed to read index.html at {:?}: {}", index_path, e);
+            (StatusCode::NOT_FOUND, "index.html not found").into_response()
+        }
     }
 }
 
